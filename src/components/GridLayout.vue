@@ -242,9 +242,6 @@
                     this.updateHeight();
                 });
             },
-            layout: function () {
-                this.layoutUpdate();
-            },
             colNum: function (val) {
                 this.eventBus.$emit("setColNum", val);
             },
