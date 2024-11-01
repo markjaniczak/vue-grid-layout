@@ -175,6 +175,8 @@
             this.$emit('layout-before-mount', this.layout);
         },
         mounted: function() {
+            console.log("I'M MOUNTED")
+
             this.$emit('layout-mounted', this.layout);
             this.$nextTick(function () {
                 validateLayout(this.layout);
@@ -242,6 +244,9 @@
                     }
                     this.updateHeight();
                 });
+            },
+            layout: function () {
+                this.layoutUpdate();
             },
             colNum: function (val) {
                 this.eventBus.$emit("setColNum", val);
