@@ -175,6 +175,8 @@
             this.$emit('layout-before-mount', this.layout);
         },
         mounted: function() {
+            console.log("I'M MOUNTED")
+
             this.$emit('layout-mounted', this.layout);
             this.$nextTick(function () {
                 validateLayout(this.layout);
@@ -190,9 +192,10 @@
                     //self.width = self.$el.offsetWidth;
                     addWindowEventListener('resize', self.onWindowResize);
 
-                    compact(self.layout, self.verticalCompact);
+                    const newLayout = compact(cloneLayout(self.layout), self.verticalCompact);
 
-                    self.$emit('layout-updated',self.layout)
+                    self.$emit('update:layout', newLayout);
+                    self.$emit('layout-updated', newLayout)
 
                     self.updateHeight();
                     self.$nextTick(function () {
@@ -301,11 +304,12 @@
                         this.initResponsiveFeatures();
                     }
 
-                    compact(this.layout, this.verticalCompact);
+                    const newLayout = compact(cloneLayout(this.layout), this.verticalCompact);
+                    this.$emit('update:layout', newLayout);
                     this.eventBus.$emit("updateWidth", this.width);
                     this.updateHeight();
 
-                    this.$emit('layout-updated',this.layout)
+                    this.$emit('layout-updated',newLayout)
                 }
             },
             updateHeight: function () {
@@ -359,24 +363,25 @@
                 }
 
                 // Move the element to the dragged location.
-                this.layout = moveElement(this.layout, l, x, y, true, this.preventCollision);
+                const newLayout = moveElement(cloneLayout(this.layout), l, x, y, true, this.preventCollision);
 
                 if (this.restoreOnDrag) {
                     // Do not compact items more than in layout before drag
                     // Set moved item as static to avoid to compact it
                     l.static = true;
-                    compact(this.layout, this.verticalCompact, this.positionsBeforeDrag);
+                    compact(newLayout, this.verticalCompact, this.positionsBeforeDrag);
                     l.static = false;
                 } else {
-                    compact(this.layout, this.verticalCompact);
+                    compact(newLayout, this.verticalCompact);
                 }
 
+                this.$emit('update:layout', newLayout);
                 // needed because vue can't detect changes on array element properties
                 this.eventBus.$emit("compact");
                 this.updateHeight();
                 if (eventName === 'dragend') {
                     delete this.positionsBeforeDrag;
-                    this.$emit('layout-updated', this.layout);
+                    this.$emit('layout-updated', newLayout);
                 }
             },
             resizeEvent: function (eventName, id, x, y, h, w) {
@@ -434,11 +439,12 @@
 
                 if (this.responsive) this.responsiveGridLayout();
 
-                compact(this.layout, this.verticalCompact);
+                const newLayout = compact(cloneLayout(this.layout), this.verticalCompact);
+                this.$emit('update:layout', newLayout);
                 this.eventBus.$emit("compact");
                 this.updateHeight();
 
-                if (eventName === 'resizeend') this.$emit('layout-updated', this.layout);
+                if (eventName === 'resizeend') this.$emit('layout-updated', newLayout);
             },
 
             // finds or generates new layouts for set breakpoints
